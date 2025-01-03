@@ -1,0 +1,1914 @@
+create table bon_fiscal
+(
+    id             int auto_increment
+        primary key,
+    valoare        int      null,
+    data           datetime null,
+    consultatie_id int      not null
+)
+    charset = utf8mb3;
+
+create index fk_bon_fiscal_programari_idx
+    on bon_fiscal (consultatie_id);
+
+create table client
+(
+    id      int auto_increment
+        primary key,
+    nume    varchar(45) null,
+    prenume varchar(45) null,
+    CNP     varchar(45) null,
+    varsta  int         null,
+    nr_tel  varchar(45) null,
+    constraint id_UNIQUE
+        unique (id)
+)
+    charset = utf8mb3;
+
+create table istoric_salarii
+(
+    id         int auto_increment
+        primary key,
+    salar      int null,
+    angajat_id int not null
+)
+    charset = utf8mb3;
+
+create index angajat_id
+    on istoric_salarii (angajat_id);
+
+create table specialitate
+(
+    id int not null
+        primary key
+)
+    charset = utf8mb3;
+
+create table unitate
+(
+    id         int auto_increment
+        primary key,
+    medic_id   int         null,
+    nume       varchar(45) null,
+    adresa     varchar(45) null,
+    echipament text        null,
+    program    varchar(45) null,
+    constraint id_UNIQUE
+        unique (id)
+)
+    charset = utf8mb3;
+
+create table istoric
+(
+    id         int         not null,
+    an         varchar(45) null,
+    venit      int         null,
+    cheltuieli int         null,
+    istoriccol varchar(45) null,
+    unitate_id int         not null,
+    primary key (id, unitate_id),
+    constraint fk_istoric_unitate1
+        foreign key (unitate_id) references unitate (id)
+)
+    charset = utf8mb3;
+
+create index fk_istoric_unitate1_idx
+    on istoric (unitate_id);
+
+create table orar
+(
+    id             int         not null
+        primary key,
+    ziuasaptamanii varchar(45) null,
+    orainceput     time        null,
+    orasfarsit     time        null,
+    tiporar        varchar(45) null,
+    utilizator_id  int         null,
+    unitate_id     int         null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint fk_orar_unitate1
+        foreign key (unitate_id) references unitate (id)
+)
+    charset = utf8mb3;
+
+create index fk_orar_medic1_idx
+    on orar (utilizator_id);
+
+create index fk_orar_unitate1_idx
+    on orar (unitate_id);
+
+create table utilizator
+(
+    id             int auto_increment
+        primary key,
+    CNP            varchar(45) null,
+    parola         int         not null,
+    functie        varchar(45) null,
+    nume           varchar(45) null,
+    prenume        varchar(45) null,
+    adresa         varchar(45) null,
+    nrtel          varchar(45) null,
+    email          varchar(45) null,
+    IBAN           varchar(45) null,
+    nrcontact      varchar(45) null,
+    data_angajarii date        null,
+    constraint id_UNIQUE
+        unique (id)
+)
+    charset = utf8mb3;
+
+create table administrator
+(
+    id           int not null
+        primary key,
+    utiliztor_id int not null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint fk_administrator_utiliztor1
+        foreign key (utiliztor_id) references utilizator (id)
+)
+    charset = utf8mb3;
+
+create index fk_administrator_utiliztor1_idx
+    on administrator (utiliztor_id);
+
+create table angajat
+(
+    id           int auto_increment
+        primary key,
+    salariu      int null,
+    nr_ore       int null,
+    utiliztor_id int not null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint fk_angajat_utiliztor1
+        foreign key (utiliztor_id) references utilizator (id)
+)
+    charset = utf8mb3;
+
+create index fk_angajat_utiliztor1_idx
+    on angajat (utiliztor_id);
+
+create table asistent
+(
+    id         int         not null
+        primary key,
+    angajat_id int         not null,
+    orar_id    int         not null,
+    nr_ore     int         null,
+    salariu    int         null,
+    tip        varchar(45) null,
+    grad       varchar(45) null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint asistent_angajat_id_fk
+        foreign key (angajat_id) references angajat (id),
+    constraint fk_asistent_orar1
+        foreign key (orar_id) references orar (id)
+)
+    charset = utf8mb3;
+
+create index fk_asistent_angajat1_idx
+    on asistent (angajat_id);
+
+create index fk_asistent_orar1_idx
+    on asistent (orar_id);
+
+create table concediu
+(
+    id           int auto_increment
+        primary key,
+    data_inceput date null,
+    data_sfarsit date null,
+    angajat_id   int  not null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint concediu_angajat_id_fk
+        foreign key (angajat_id) references angajat (id)
+)
+    charset = utf8mb3;
+
+create index fk_concediu_angajat1_idx
+    on concediu (angajat_id);
+
+create table financiar
+(
+    id         int not null
+        primary key,
+    angajat_id int not null,
+    orar_id    int not null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint financiar_angajat_id_fk
+        foreign key (angajat_id) references angajat (id),
+    constraint financiar_ibfk_1
+        foreign key (orar_id) references orar (id)
+)
+    charset = utf8mb3;
+
+create index orar_id
+    on financiar (orar_id);
+
+create table medic
+(
+    id               int         not null
+        primary key,
+    angajat_id       int         not null,
+    serviciu_id      int         null,
+    salariu          int         null,
+    nr_ore           int         null,
+    specialitatea    varchar(45) null,
+    grad             varchar(45) null,
+    cod_parafa       varchar(45) null,
+    competente       varchar(45) null,
+    titlu_stiintific varchar(45) null,
+    postul_didactic  int         null,
+    procent          int         null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint medic_angajat_id_fk
+        foreign key (angajat_id) references angajat (id)
+)
+    charset = utf8mb3;
+
+create table raport_medical
+(
+    id               int auto_increment
+        primary key,
+    client_id        int          not null,
+    medic_id         int          null,
+    rezultat_analiza varchar(45)  null,
+    nume_analiza     varchar(100) null,
+    data             date         null,
+    simptome         text         null,
+    diagnostic       text         null,
+    recomandari      text         null,
+    constraint `fk_raport medical_client1`
+        foreign key (client_id) references client (id),
+    constraint raport_medical_medic_id_fk
+        foreign key (medic_id) references medic (id)
+)
+    charset = utf8mb3;
+
+create index `fk_raport medical_client1_idx`
+    on raport_medical (client_id);
+
+create index `fk_raport medical_medic1_idx`
+    on raport_medical (medic_id);
+
+create table receptioner
+(
+    id         int not null
+        primary key,
+    angajat_id int not null,
+    orar_id    int not null,
+    constraint fk_receptioner_orar1
+        foreign key (orar_id) references orar (id),
+    constraint receptioner_angajat_id_fk
+        foreign key (angajat_id) references angajat (id)
+)
+    charset = utf8mb3;
+
+create index fk_receptioner_angajat1_idx
+    on receptioner (angajat_id);
+
+create index fk_receptioner_orar1_idx
+    on receptioner (orar_id);
+
+create table resurse_umane
+(
+    id         int not null
+        primary key,
+    angajat_id int not null,
+    orar_id    int not null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint resurse_umane_angajat_id_fk
+        foreign key (angajat_id) references angajat (id),
+    constraint resurse_umane_ibfk_1
+        foreign key (orar_id) references orar (id)
+)
+    charset = utf8mb3;
+
+create index orar_id
+    on resurse_umane (orar_id);
+
+create table servicii
+(
+    id                  int          not null
+        primary key,
+    unitate_id          int          not null,
+    medic_id            int          null,
+    nume                varchar(45)  null,
+    specialitate        varchar(45)  null,
+    competenta_necesara varchar(200) null,
+    pret                int          null,
+    durata              int          null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint fk_servicii_unitate1
+        foreign key (unitate_id) references unitate (id),
+    constraint servicii_medic_id_fk
+        foreign key (medic_id) references medic (id)
+)
+    charset = utf8mb3;
+
+create table consultatie_has_servicii
+(
+    consultatie_id int not null,
+    servicii_id    int not null,
+    primary key (consultatie_id, servicii_id),
+    constraint fk_consultatie_has_servicii_servicii1
+        foreign key (servicii_id) references servicii (id)
+)
+    charset = utf8mb3;
+
+create index fk_consultatie_has_servicii_consultatie1_idx
+    on consultatie_has_servicii (consultatie_id);
+
+create index fk_consultatie_has_servicii_servicii1_idx
+    on consultatie_has_servicii (servicii_id);
+
+alter table medic
+    add constraint medic_servicii_id_fk
+        foreign key (serviciu_id) references servicii (id);
+
+alter table medic
+    add constraint medic_servicii_medic_id_fk
+        foreign key (id) references servicii (medic_id);
+
+create table programari
+(
+    id          int auto_increment
+        primary key,
+    serviciu_id int         null,
+    client_id   int         not null,
+    medic_id    int         not null,
+    data        datetime    not null,
+    durata      int         null,
+    parafa      varchar(45) null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint fk_consultatie_client1
+        foreign key (client_id) references client (id),
+    constraint programari_servicii_id_fk
+        foreign key (serviciu_id) references servicii (id)
+)
+    charset = utf8mb3;
+
+create index fk_consultatie_client1_idx
+    on programari (client_id);
+
+create index fk_consultatie_medic1_idx
+    on programari (medic_id);
+
+create index fk_servicii_unitate1_idx
+    on servicii (unitate_id);
+
+create table super_administrator
+(
+    id           int not null
+        primary key,
+    utiliztor_id int not null,
+    constraint id_UNIQUE
+        unique (id),
+    constraint `fk_super-administrator_utiliztor1`
+        foreign key (utiliztor_id) references utilizator (id)
+)
+    charset = utf8mb3;
+
+create index `fk_super-administrator_utiliztor1_idx`
+    on super_administrator (utiliztor_id);
+
+create
+    definer = root@localhost procedure AdaugaSalariiAsistentiLaCheltuieli()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE asistentID INT;
+    DECLARE asistentSalary INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT id, salariu FROM proiect2.asistent;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO asistentID, asistentSalary;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Actualizează cheltuielile unității pentru fiecare asistent
+        UPDATE proiect2.unitate u
+            JOIN proiect2.orar o ON u.id = o.unitate_id
+            JOIN proiect2.asistent a ON o.unitate_id = a.orar_id
+        SET u.cheltuieli = u.cheltuieli + asistentSalary
+        WHERE a.id = asistentID;
+    END LOOP;
+
+    CLOSE cur;
+
+    -- Afisează cheltuielile actualizate pentru fiecare unitate
+    SELECT * FROM proiect2.unitate;
+END;
+
+create
+    definer = root@localhost procedure AdaugaSalariiFinanciariLaCheltuieli()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE financiarID INT;
+    DECLARE financiarSalary INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT f.id, a.salariu  -- Modificarea numelui coloanei pentru salariu
+        FROM proiect2.angajat a
+                 JOIN proiect2.financiar f ON a.id = f.angajat_id;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO financiarID, financiarSalary;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Actualizează cheltuielile unității pentru fiecare financiar
+        UPDATE proiect2.unitate u
+        SET u.cheltuieli = u.cheltuieli + financiarSalary
+        WHERE u.id IN (
+            SELECT o.unitate_id
+            FROM proiect2.orar o
+                     JOIN proiect2.financiar f ON o.id = f.orar_id
+            WHERE f.id = financiarID
+        );
+    END LOOP;
+
+    CLOSE cur;
+
+    -- Afisează cheltuielile actualizate pentru fiecare unitate
+    SELECT * FROM proiect2.unitate;
+END;
+
+create
+    definer = root@localhost procedure AdaugaSalariiLaCheltuieli()
+BEGIN
+    DECLARE medicID INT;
+    DECLARE medicSalary INT;
+
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur CURSOR FOR
+        SELECT id, salariu FROM proiect2.medic;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO medicID, medicSalary;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Adaugă salariul fiecărui medic la cheltuielile unității
+        UPDATE proiect2.unitate u
+            JOIN proiect2.orar o ON u.id = o.unitate_id
+        SET u.cheltuieli = u.cheltuieli + medicSalary
+        WHERE o.medic_id = medicID;
+    END LOOP;
+
+    CLOSE cur;
+
+    -- Afisează cheltuielile actualizate pentru fiecare unitate
+    SELECT * FROM proiect2.unitate;
+END;
+
+create
+    definer = root@localhost procedure AdaugaSalariiReceptioneriLaCheltuieli()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE receptionerID INT;
+    DECLARE receptionerSalary INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT r.id, a.salariu
+        FROM proiect2.angajat a
+                 JOIN proiect2.receptioner r ON a.id = r.angajat_id;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO receptionerID, receptionerSalary;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Actualizează cheltuielile unității pentru fiecare receptioner
+        UPDATE proiect2.unitate u
+            JOIN proiect2.orar o ON u.id = o.unitate_id
+            JOIN proiect2.receptioner r ON o.unitate_id = r.orar_id
+        SET u.cheltuieli = u.cheltuieli + receptionerSalary
+        WHERE r.id = receptionerID;
+    END LOOP;
+
+    CLOSE cur;
+
+    -- Afisează cheltuielile actualizate pentru fiecare unitate
+    SELECT * FROM proiect2.unitate;
+END;
+
+create
+    definer = root@localhost procedure AdaugareAngajat(IN p_salariu int, IN p_nr_ore int, IN p_utilizator_id int)
+BEGIN
+    -- Check if the utilizator_id exists in the utilizator table
+    DECLARE utilizatorExist INT;
+
+    -- Check for the existence of utilizator_id in the utilizator table
+    SELECT COUNT(*) INTO utilizatorExist
+    FROM utilizator
+    WHERE id = p_utilizator_id;
+
+    -- If the utilizator_id doesn't exist, raise an error
+    IF utilizatorExist = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Eroare: utilizator_id nu există în tabelul utilizator';
+    ELSE
+        -- Insert into angajat table if utilizator_id exists
+        INSERT INTO angajat (
+            salariu,
+            nr_ore,
+            utiliztor_id
+        )
+        VALUES (
+                   p_salariu,
+                   p_nr_ore,
+                   p_utilizator_id
+               );
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure AdaugareOrar(IN in_ziua_saptamanii varchar(45), IN in_ora_inceput time,
+                                                    IN in_ora_sfarsit time, IN in_tip_orar varchar(45),
+                                                    IN in_medic_id int, IN in_unitate_id int)
+BEGIN
+    DECLARE new_id INT;
+
+    SELECT COALESCE(MAX(id), 0) + 1 INTO new_id FROM `proiect2`.`orar`;
+    INSERT INTO `proiect2`.`orar` (
+        `id`,
+        `ziuasaptamanii`,
+        `orainceput`,
+        `orasfarsit`,
+        `tiporar`,
+        `medic_id`,
+        `unitate_id`
+    ) VALUES (
+                 new_id,
+                 in_ziua_saptamanii,
+                 in_ora_inceput,
+                 in_ora_sfarsit,
+                 in_tip_orar,
+                 in_medic_id,
+                 in_unitate_id
+             );
+END;
+
+create
+    definer = root@localhost procedure AdaugareUnitate(IN in_nume varchar(45), IN in_adresa varchar(45),
+                                                       IN in_echipament text, IN in_program varchar(45))
+BEGIN
+    INSERT INTO unitate (
+        nume,
+        adresa,
+        echipament,
+        program
+        
+    )
+    VALUES (
+               in_nume,
+               in_adresa,
+               in_echipament,
+               in_program
+    
+           );
+END;
+
+create
+    definer = root@localhost procedure AdaugareUtilizator(IN in_CNP varchar(45), IN in_parola int,
+                                                          IN in_functie varchar(45), IN in_nume varchar(45),
+                                                          IN in_prenume varchar(45), IN in_adresa varchar(45),
+                                                          IN in_nrtel varchar(45), IN in_email varchar(45),
+                                                          IN in_IBAN varchar(45), IN in_nrcontact varchar(45),
+                                                          IN in_data_angajarii date)
+BEGIN
+    INSERT INTO utilizator (
+        CNP,
+        parola,
+        functie,
+        nume,
+        prenume,
+        adresa,
+        nrtel,
+        email,
+        IBAN,
+        nrcontact,
+        data_angajarii
+    )
+    VALUES (
+               in_CNP,
+               in_parola,
+               in_functie,
+               in_nume,
+               in_prenume,
+               in_adresa,
+               in_nrtel,
+               in_email,
+               in_IBAN,
+               in_nrcontact,
+               in_data_angajarii
+           );
+END;
+
+create
+    definer = root@localhost procedure AfisareAngajati()
+BEGIN
+    SELECT * FROM `proiect2`.`angajat`;
+END;
+
+create
+    definer = root@localhost procedure AfisareClientiMedicZiuaCurenta(IN p_cnp varchar(255))
+BEGIN
+    DECLARE medic_id INT;
+    DECLARE dataCurenta DATE;
+
+
+    -- Obține id-ul din tabela utilizator pentru medicul cu numele și prenumele specificate
+    SELECT id INTO medic_id
+    FROM utilizator
+    WHERE cnp=p_cnp;
+
+    IF medic_id IS NOT NULL THEN
+        SET dataCurenta = CURDATE();
+
+        -- Afișează clienții pentru medicul cu id-ul obținut și în ziua curentă
+        SELECT C.*
+        FROM client C
+                 JOIN programari CO ON C.id = CO.client_id
+        WHERE CO.medic_id = medic_id AND DATE(CO.data) = dataCurenta;
+    ELSE
+        SELECT 'Medicul nu a fost găsit în tabela utilizator.';
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure AfisareConcedii()
+BEGIN
+    SELECT * FROM `proiect2`.`concediu` WHERE data_sfarsit < NOW();
+END;
+
+create
+    definer = root@localhost procedure AfisareConcediuDupaCNP(IN in_cnp_utilizator varchar(13))
+BEGIN
+    DECLARE angajat_id INT;
+
+    SELECT a.id INTO angajat_id
+    FROM angajat a
+             INNER JOIN utilizator u ON a.utiliztor_id = u.id
+    WHERE u.cnp = in_cnp_utilizator;
+
+    IF angajat_id IS NOT NULL THEN
+        SELECT
+            c.*,
+            u.nume AS nume_utilizator,
+            u.prenume AS prenume_utilizator
+        FROM
+            concediu c
+                JOIN
+            angajat a ON c.angajat_id = a.id
+                JOIN
+            utilizator u ON a.utiliztor_id = u.id
+        WHERE
+            a.id = angajat_id;
+
+    ELSE
+        SELECT 'Utilizatorul nu a fost găsit în tabelul angajat.';
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure AfisareDatePersonale(IN cnp_param varchar(13))
+BEGIN
+    SELECT
+        id,
+        nume,
+        prenume,
+        adresa,
+        nrtel,
+        email,
+        IBAN,
+        nrcontact,
+        data_angajarii,
+        functie
+    FROM utilizator
+    WHERE CNP = cnp_param;
+END;
+
+create
+    definer = root@localhost procedure AfisareDatePersonaleDupaCNP(IN cnp_param varchar(45))
+BEGIN
+    SELECT
+        id,
+        nume,
+        prenume,
+        adresa,
+        nrtel,
+        email,
+        IBAN,
+        nrcontact,
+        data_angajarii,
+        functie
+    FROM utilizator
+    WHERE CNP = cnp_param;
+END;
+
+create
+    definer = root@localhost procedure AfisareIstoricSalariiDupaCNP(IN p_cnp varchar(13))
+BEGIN
+    DECLARE angajat_id INT;
+
+    -- Obține id-ul din tabela utilizator
+    SELECT id INTO angajat_id
+    FROM utilizator
+    WHERE CNP = p_cnp;
+
+    IF angajat_id IS NOT NULL THEN
+        -- Afișează istoricul salariilor pentru angajatul cu id-ul obținut
+        SELECT * FROM istoric_salarii
+        WHERE angajat_id = angajat_id;
+    ELSE
+        SELECT 'Utilizatorul nu a fost găsit în tabelul utilizator.';
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure AfisareOrarByCnp(IN inputCnp varchar(13))
+BEGIN
+    SELECT
+    
+        o.ziuasaptamanii AS ziua_saptamanii,
+        o.orainceput AS ora_inceput,
+        o.orasfarsit AS ora_sfarsit,
+        o.unitate_id
+    FROM
+        utilizator u
+            INNER JOIN
+        orar o
+        ON
+            u.id = o.utilizator_id
+    WHERE
+        u.CNP = inputCnp;
+END;
+
+create
+    definer = root@localhost procedure AfisareOrare()
+BEGIN
+    SELECT * FROM `proiect2`.`orar`;
+END;
+
+create
+    definer = root@localhost procedure AfisarePacienti()
+BEGIN
+    SELECT * FROM `proiect2`.`client`;
+END;
+
+create
+    definer = root@localhost procedure AfisareProgramareByCnp(IN inputCnp varchar(45))
+BEGIN
+    -- Selectarea programărilor pentru medicul corespunzător cu informațiile suplimentare
+    SELECT
+        p.id AS programare_id,
+        s.nume AS serviciu_nume,
+        c.nume AS client_nume,
+        c.prenume AS client_prenume,
+        -- Preluarea numelui și prenume medicului din tabelul utilizator, care este legat prin angajat
+        utilizator.nume AS medic_nume,
+        utilizator.prenume AS medic_prenume,
+        p.data,
+        p.durata,
+        p.parafa
+    FROM
+        programari p
+            JOIN
+        servicii s ON p.serviciu_id = s.id
+            JOIN
+        client c ON p.client_id = c.id
+            JOIN
+        medic m ON p.medic_id = m.id
+            JOIN
+        angajat a ON m.angajat_id = a.id
+            JOIN
+        utilizator ON a.utiliztor_id = utilizator.id  -- Legătura corectă cu utilizatorul medicului
+    WHERE
+        utilizator.CNP = inputCnp;
+END;
+
+create
+    definer = root@localhost procedure AfisareProgramari()
+BEGIN
+    SELECT * FROM `proiect2`.`programari`;
+END;
+
+create
+    definer = root@localhost procedure AfisareRapoarte()
+BEGIN
+    SELECT * FROM `proiect2`.`raport_medical`;
+END;
+
+create
+    definer = root@localhost procedure AfisareRapoarteByCnp(IN inputCnp varchar(45))
+BEGIN
+    -- Selectarea rapoartelor medicale pentru clientul identificat după CNP
+    SELECT
+        r.id AS raport_id,
+        c.nume AS client_nume,
+        c.prenume AS client_prenume,
+        -- Preluarea numelui și prenume medicului din tabelul utilizator
+        u.nume AS medic_nume,
+        u.prenume AS medic_prenume,
+        r.rezultat_analiza,
+        r.nume_analiza,
+        r.data,
+        r.simptome,
+        r.diagnostic,
+        r.recomandari
+    FROM
+        raport_medical r
+            JOIN client c ON r.client_id = c.id
+            JOIN medic m ON r.medic_id = m.id
+            JOIN angajat a ON m.angajat_id = a.id  -- Legătura cu angajatul medicului
+            JOIN utilizator u ON a.utiliztor_id = u.id  -- Legătura cu utilizatorul pentru medic
+    WHERE
+        u.CNP = inputCnp;
+END;
+
+create
+    definer = root@localhost procedure AfisareRapoarteMedicalByIDClient(IN p_client_id int)
+BEGIN
+    SELECT RM.*
+    FROM `proiect2`.`raport_medical` RM
+             JOIN `proiect2`.`client` C ON RM.client_id = C.id
+    WHERE C.id = p_client_id;
+END;
+
+create
+    definer = root@localhost procedure AfisareSalarByAngajatId(IN in_angajat_id int)
+BEGIN
+    -- Declare a variable to hold the salary
+    DECLARE v_salariu INT;
+
+    -- Check if the employee exists
+    IF NOT EXISTS (SELECT 1 FROM angajat WHERE id = in_angajat_id) THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Error: Angajat ID does not exist in the angajat table';
+    ELSE
+        -- Retrieve the salary of the employee
+        SELECT salariu INTO v_salariu
+        FROM angajat
+        WHERE id = in_angajat_id;
+
+        -- Output the salary
+        SELECT CONCAT('The salary for Angajat ID ', in_angajat_id, ' is: ', v_salariu) AS SalaryInfo;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure AfisareUnitati()
+BEGIN
+    SELECT * FROM `proiect2`.`unitate`;
+END;
+
+create
+    definer = root@localhost procedure AfisareUtilizatori()
+BEGIN
+    SELECT * FROM `proiect2`.`utilizator`;
+END;
+
+create
+    definer = root@localhost procedure AfiseazaProfitul(IN unitateID int)
+BEGIN
+    DECLARE venituriUnitate INT;
+    DECLARE cheltuieliUnitate INT;
+    DECLARE profit INT;
+
+    -- Fetch the venituri and cheltuieli for the given unitateID
+    SELECT venituri, cheltuieli
+    INTO venituriUnitate, cheltuieliUnitate
+    FROM unitate
+    WHERE id = unitateID;
+
+    -- Calculate profit
+    SET profit = venituriUnitate - cheltuieliUnitate;
+
+    -- Display the result
+    SELECT CONCAT('Profitul unității cu ID-ul ', unitateID, ' este: ', profit) AS rezultat;
+END;
+
+create
+    definer = root@localhost procedure AfiseazaSalariiLuniPrecedente()
+BEGIN
+    DECLARE current_month DATE;
+    DECLARE previous_month DATE;
+
+    -- Obține data curentă
+    SET current_month = CURDATE();
+
+    -- Calculează data lunii precedentă
+    SET previous_month = DATE_SUB(current_month, INTERVAL 1 MONTH);
+
+    -- Afișează informații despre luna curentă și luna precedentă
+    SELECT current_month AS LunaCurenta, previous_month AS LunaPrecedenta;
+
+    -- Selectează salariile din luna precedentă pentru fiecare angajat
+    SELECT a.id AS AngajatID, IFNULL(i.salar, 0) AS SalariuLunaPrecedenta
+    FROM angajat a
+             LEFT JOIN istoric_salarii i ON a.id = i.angajat_id;
+END;
+
+create
+    definer = root@localhost procedure CalculProfitUnitate(IN p_unitate_id int, OUT p_profit decimal(10, 2))
+BEGIN
+    DECLARE venituri DECIMAL(10, 2) DEFAULT 0;
+    DECLARE cheltuieli DECIMAL(10, 2) DEFAULT 0;
+
+    -- Calculăm veniturile din programări
+    SELECT COALESCE(SUM(s.pret), 0) INTO venituri
+    FROM programari p
+             INNER JOIN servicii s ON p.serviciu_id = s.id
+    WHERE s.unitate_id = p_unitate_id;
+
+    -- Calculăm cheltuielile (salariile medicilor pe oră)
+    SELECT COALESCE(SUM(a.salariu/160 ), 0) INTO cheltuieli
+    FROM angajat a
+             INNER JOIN medic m ON a.id = m.angajat_id
+             INNER JOIN servicii s ON m.id = s.medic_id
+    WHERE s.unitate_id = p_unitate_id;
+
+    -- Calculăm profitul
+    SET p_profit = venituri - cheltuieli;
+END;
+
+create
+    definer = root@localhost procedure CalculSumaValoriBonFiscalPentruMedic(IN id_medic_param int)
+BEGIN
+    DECLARE suma INT DEFAULT 0;
+    DECLARE id_consult INT;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur CURSOR FOR
+        SELECT id
+        FROM programari
+        WHERE medic_id = id_medic_param
+        ORDER BY id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+    read_loop: WHILE NOT done DO
+            FETCH cur INTO id_consult;
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+            SET suma = suma + getValoareBonFiscalByIdMedic(id_medic_param, id_consult);
+        END WHILE;
+
+    CLOSE cur;
+    SELECT suma AS SumaValoriBonFiscal;
+END;
+
+create
+    definer = root@localhost function CheckCNPExists(cnp_to_check varchar(45)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE exists_flag BOOLEAN;
+    SELECT EXISTS(SELECT 1 FROM utilizator WHERE CNP = cnp_to_check) INTO exists_flag;
+    RETURN exists_flag;
+END;
+
+create
+    definer = root@localhost procedure CompletareRaport(IN nume_client varchar(100), IN prenume_client varchar(100),
+                                                        IN raport_id int, IN diagnostic_nou text,
+                                                        IN recomandari_noi text)
+BEGIN
+    DECLARE client_id_verificat INT;
+    DECLARE raport_found INT;
+
+    -- Verificăm dacă există clientul cu numele și prenumele specificat
+    SELECT id INTO client_id_verificat
+    FROM client
+    WHERE nume = nume_client AND prenume = prenume_client
+    LIMIT 1;
+
+    -- Dacă clientul nu există, aruncăm o eroare
+    IF client_id_verificat IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Clientul cu numele și prenumele specificat nu există!';
+    END IF;
+
+    -- Verificăm dacă raportul medical există pentru ID-ul specificat
+    SELECT COUNT(*) INTO raport_found
+    FROM raport_medical
+    WHERE id = raport_id;
+
+    -- Dacă raportul medical nu există, aruncăm o eroare
+    IF raport_found = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Raportul medical cu ID-ul specificat nu există!';
+    END IF;
+
+    -- Verificăm dacă raportul medical aparține clientului specificat
+    SELECT COUNT(*) INTO raport_found
+    FROM raport_medical
+    WHERE id = raport_id AND client_id = client_id_verificat;
+
+    -- Dacă raportul medical nu corespunde clientului, aruncăm o eroare
+    IF raport_found = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Raportul medical nu aparține clientului specificat!';
+    END IF;
+
+    -- Actualizăm diagnosticul și recomandările în tabelul raport_medical
+    UPDATE raport_medical
+    SET diagnostic = diagnostic_nou,
+        recomandari = recomandari_noi
+    WHERE id = raport_id AND client_id = client_id_verificat;
+
+    -- Verificăm dacă actualizarea a fost efectuată (ar trebui să fie redundant acum)
+    IF ROW_COUNT() = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Eroare neașteptată în actualizarea raportului medical!';
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure CreareRaportMedical(IN numePacient varchar(45), IN prenumePacient varchar(45),
+                                                           IN rezultat varchar(45), IN NumeAnaliza varchar(100),
+                                                           IN data date, IN simptome text, IN input_cnp varchar(45))
+BEGIN
+    DECLARE client_id_verificat INT;
+    DECLARE utilizator_id INT;
+    DECLARE angajat_id_utilizator_val INT;
+    DECLARE medic_id_final INT;
+    DECLARE debug_message VARCHAR(255);
+
+    -- 1. Verificăm dacă există un client cu numele și prenumele
+    SELECT id INTO client_id_verificat
+    FROM client
+    WHERE nume = numePacient AND prenume = prenumePacient
+    LIMIT 1;
+
+    IF client_id_verificat IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Clientul cu numele și prenumele specificat nu există!';
+    END IF;
+
+    -- Debug: Verificăm client_id_verificat
+    SET debug_message = CONCAT('Client ID: ', client_id_verificat);
+    SELECT debug_message;
+
+    -- 2. Căutăm utilizatorul după CNP
+    SELECT id INTO utilizator_id
+    FROM utilizator
+    WHERE CNP = input_cnp -- Using renamed parameter
+    LIMIT 1;
+
+    IF utilizator_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Utilizatorul cu CNP-ul specificat nu există!';
+    END IF;
+
+    -- Debug: Verificăm utilizator_id
+    SET debug_message = CONCAT('Utilizator ID: ', utilizator_id);
+    SELECT debug_message;
+
+    -- 3. Căutăm angajatul asociat utilizatorului
+    SELECT id INTO angajat_id_utilizator_val
+    FROM angajat
+    WHERE utiliztor_id = utilizator_id
+    LIMIT 1;
+
+    IF angajat_id_utilizator_val IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Angajatul asociat utilizatorului nu a fost găsit!';
+    END IF;
+
+    -- Debug: Verificăm angajat_id_utilizator_val
+    SET debug_message = CONCAT('Angajat ID: ', angajat_id_utilizator_val);
+    SELECT debug_message;
+
+    -- 4. Căutăm medicul asociat angajatului
+    SELECT id INTO medic_id_final
+    FROM medic
+    WHERE angajat_id = angajat_id_utilizator_val
+    LIMIT 1;
+
+    IF medic_id_final IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Medicul asociat angajatului nu a fost găsit!';
+    END IF;
+
+    -- Debug: Verificăm medic_id_final
+    SET debug_message = CONCAT('Medicul ID: ', medic_id_final);
+    SELECT debug_message;
+
+    -- 5. Inserăm raportul medical
+    INSERT INTO raport_medical (
+        client_id,
+        medic_id,
+        rezultat_analiza,
+        nume_analiza,
+        data,
+        simptome
+    )
+    VALUES (
+               client_id_verificat,
+               medic_id_final,
+               rezultat,
+               NumeAnaliza,
+               data,
+               simptome
+           );
+
+    -- Debug: Confirmarea inserării
+    SET debug_message = 'Raportul a fost inserat cu succes.';
+    SELECT debug_message;
+
+END;
+
+create
+    definer = root@localhost function FindAngajatIdByUtilizatorId(in_utilizator_id int) returns int deterministic
+BEGIN
+    DECLARE angajat_id INT;
+    SELECT id INTO angajat_id FROM angajat WHERE utiliztor_id = in_utilizator_id;
+    IF angajat_id IS NOT NULL THEN
+        RETURN angajat_id;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+
+create
+    definer = root@localhost function GetAngajatId(in_name varchar(45), in_surname varchar(45),
+                                                   in_function varchar(45)) returns int deterministic
+BEGIN
+    DECLARE user_id INT;
+    DECLARE angajat_id INT;
+
+    SELECT id INTO user_id
+    FROM proiect2.utilizator
+    WHERE nume = in_name AND prenume = in_surname AND functie = in_function;
+
+    SELECT id INTO angajat_id
+    FROM proiect2.angajat
+    WHERE utiliztor_id = user_id;
+
+    IF angajat_id IS NOT NULL THEN
+        RETURN angajat_id;
+    ELSE
+        RETURN -1;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure GetConcediuDataForUtilizator(IN in_utilizator_id int)
+BEGIN
+    DECLARE angajat_id INT;
+    DECLARE orar_id INT;
+    SET angajat_id = FindAngajatIdByUtilizatorId(in_utilizator_id);
+    call GetOrarForAngajat(angajat_id);
+    IF angajat_id IS NOT NULL THEN
+
+        SELECT
+            c.*,
+            u.nume AS nume_utilizator,
+            u.prenume AS prenume_utilizator
+        FROM
+            concediu c
+                JOIN
+            angajat a ON c.angajat_id = a.id
+                JOIN
+            utilizator u ON a.utiliztor_id = u.id
+        WHERE
+            a.id = angajat_id;
+
+    ELSE
+        SELECT 'Utilizatorul nu a fost găsit în tabelul angajat.';
+    END IF;
+
+END;
+
+create
+    definer = root@localhost procedure GetOrarForAngajat(IN in_angajat_id int)
+BEGIN
+    DECLARE orar_id INT;
+    DECLARE orar_id1 INT;
+    SET orar_id = gaseste_orar_id(in_angajat_id);
+    IF orar_id IS NULL THEN
+        SET orar_id1 = gaseste_id_orar_angajat(in_angajat_id);
+
+        SELECT b.*
+        FROM orar b
+        WHERE b.id = orar_id1;
+    ELSE
+        SELECT o.*
+        FROM orar o
+        WHERE o.id = orar_id;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure GetUtilizatorId(IN in_nume varchar(45), IN in_prenume varchar(45), OUT out_id int)
+BEGIN
+    -- Inițializarea variabilei out_id la NULL
+    SET out_id = NULL;
+
+    -- Căutarea utilizatorului în baza de date
+    SELECT id
+    INTO out_id
+    FROM utilizator
+    WHERE nume = in_nume OR prenume = in_prenume
+    LIMIT 1;
+
+    -- Dacă nu este găsit, setează ID-ul pe -1 (cod special pentru utilizator negăsit)
+    IF out_id IS NULL THEN
+        SET out_id = -1;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure InserareBonFiscal(IN p_valoare int, IN p_data datetime, IN p_consultatie_id int)
+BEGIN
+    -- Declare variable to check if consultatie_id exists
+    DECLARE consultatie_exists INT;
+
+    -- Declare an error message variable
+    DECLARE error_msg VARCHAR(255);
+
+    -- Check if the consultatie_id exists in the programari table
+    SELECT COUNT(*) INTO consultatie_exists
+    FROM `proiect2`.`programari`
+    WHERE id = p_consultatie_id;
+
+    -- If consultatie_id doesn't exist, raise an error and exit the procedure
+    IF consultatie_exists = 0 THEN
+        SET error_msg = CONCAT('Consultatie ID ', p_consultatie_id, ' does not exist in the programari table.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = error_msg;
+    END IF;
+
+    -- Insert the new record into bon_fiscal
+    INSERT INTO `proiect2`.`bon_fiscal` (valoare, data, consultatie_id)
+    VALUES (p_valoare, p_data, p_consultatie_id);
+END;
+
+create
+    definer = root@localhost procedure InserareClient(IN p_nume varchar(45), IN p_prenume varchar(45),
+                                                      IN p_CNP varchar(45), IN p_varsta int, IN p_nr_tel varchar(45))
+BEGIN
+    INSERT INTO `proiect2`.`client` (nume, prenume, CNP, varsta, nr_tel)
+    VALUES (p_nume, p_prenume, p_CNP, p_varsta, p_nr_tel);
+END;
+
+create
+    definer = root@localhost procedure InserareConcediu(IN in_nume_angajat varchar(100),
+                                                        IN in_prenume_angajat varchar(100), IN in_data_inceput date,
+                                                        IN in_data_sfarsit date)
+BEGIN
+    DECLARE new_id INT;
+    DECLARE angajat_id INT;
+
+    -- Obține ID-ul angajatului folosind numele și prenumele din tabela utilizator
+    SELECT A.id INTO angajat_id
+    FROM angajat A
+             INNER JOIN utilizator U ON A.utiliztor_id = U.id
+    WHERE U.nume = in_nume_angajat AND U.prenume = in_prenume_angajat;
+
+    IF angajat_id IS NOT NULL THEN
+        SELECT COALESCE(MAX(id), 0) + 1 INTO new_id FROM `proiect2`.`concediu`;
+
+        INSERT INTO `proiect2`.`concediu` (
+            `id`,
+            `data_inceput`,
+            `data_sfarsit`,
+            `angajat_id`
+        ) VALUES (
+                     new_id,
+                     in_data_inceput,
+                     in_data_sfarsit,
+                     angajat_id
+                 );
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure InserareConsultatieSiServicii(IN p_id int)
+BEGIN
+    DECLARE ultimaConsultatieId INT;
+    DECLARE ultimulServiciuId INT;
+
+    -- Obține ultimul id din tabela consultatii
+    SELECT MAX(id) INTO ultimaConsultatieId FROM consultatie;
+
+    -- Obține ultimul id din tabela servicii (presupunând că există o astfel de tabelă)
+
+    -- Verifică dacă ambele id-uri au fost obținute cu succes
+    IF ultimaConsultatieId IS NOT NULL AND p_id IS NOT NULL THEN
+        -- Inserează în tabela consultatie_has_servicii
+        INSERT INTO consultatie_has_servicii (consultatie_id, servicii_id)
+        VALUES (ultimaConsultatieId, p_id);
+
+        -- Poți adăuga aici și alte acțiuni sau print-uri pentru a urmări execuția procedurii
+    ELSE
+        -- Dacă nu s-au obținut ambele id-uri, poți gestiona eroarea așa cum dorești
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nu s-au putut obține ambele id-uri necesare.';
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure InserareProgramare(IN p_data datetime, IN p_nume_client varchar(255),
+                                                          IN p_prenume_client varchar(255), IN p_serviciu_id int,
+                                                          IN p_durata int)
+BEGIN
+    DECLARE client_id INT;
+    DECLARE medic_id1 INT;
+
+    -- Obține id-ul clientului pe baza numelui și prenumelui
+    SELECT id INTO client_id
+    FROM client
+    WHERE nume = p_nume_client AND prenume = p_prenume_client;
+
+    -- Verifică dacă s-a găsit clientul
+    IF client_id IS NOT NULL THEN
+        -- Obține id-ul medicului pentru serviciul respectiv
+        SELECT medic_id INTO medic_id1
+        FROM servicii
+        WHERE id = p_serviciu_id;
+
+        -- Verifică dacă s-a găsit medicul pentru serviciu
+        IF medic_id1 IS NOT NULL THEN
+            -- Inserează în tabela programari
+            INSERT INTO programari (serviciu_id, client_id, medic_id, durata, data)
+            VALUES (p_serviciu_id, client_id, medic_id1, p_durata, p_data);
+        ELSE
+            -- Dacă nu s-a găsit medicul, semnalizează eroare
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Medicul pentru serviciu nu a fost găsit.';
+        END IF;
+    ELSE
+        -- Dacă nu s-a găsit clientul, semnalizează eroare
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Clientul nu a fost găsit.';
+    END IF;
+END;
+
+create
+    definer = root@localhost function IsAdministrator(in_cnp varchar(13)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE utilizator_id INT;
+
+    -- Găsește utilizatorul după CNP
+    SELECT id INTO utilizator_id
+    FROM utilizator
+    WHERE CNP = in_cnp;
+
+    IF utilizator_id IS NOT NULL THEN
+        -- Verifică dacă utilizatorul este administrator
+        RETURN EXISTS (
+            SELECT 1
+            FROM administrator
+            WHERE utilizator_id = utiliztor_id
+        );
+    ELSE
+        -- Utilizatorul nu a fost găsit
+        RETURN FALSE;
+    END IF;
+END;
+
+create
+    definer = root@localhost function IsAsistentMedical(cnp_to_check varchar(45)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE is_asistent BOOLEAN;
+
+    SET is_asistent = EXISTS (
+        SELECT 1
+        FROM proiect2.utilizator u
+                 JOIN proiect2.angajat a ON u.id = a.utiliztor_id
+                 JOIN proiect2.asistent am ON a.id = am.angajat_id
+        WHERE u.CNP = cnp_to_check
+    );
+
+    RETURN is_asistent;
+END;
+
+create
+    definer = root@localhost function IsFinanciar(cnp_to_check varchar(45)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE is_financiar BOOLEAN;
+
+    SET is_financiar = EXISTS (
+        SELECT 1
+        FROM proiect2.utilizator u
+                 JOIN proiect2.angajat a ON u.id = a.utiliztor_id
+                 JOIN proiect2.financiar f ON a.id = f.angajat_id
+        WHERE u.CNP = cnp_to_check
+    );
+
+    RETURN is_financiar;
+END;
+
+create
+    definer = root@localhost function IsMedic(cnp_to_check varchar(45)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE is_medic BOOLEAN;
+
+    SET is_medic = EXISTS (
+        SELECT 1
+        FROM proiect2.utilizator u
+                 JOIN proiect2.angajat a ON u.id = a.utiliztor_id
+                 JOIN proiect2.medic m ON a.id = m.angajat_id
+        WHERE u.CNP = cnp_to_check
+    );
+
+    RETURN is_medic;
+END;
+
+create
+    definer = root@localhost function IsReceptioner(cnp_to_check varchar(45)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE is_receptioner BOOLEAN;
+
+    SET is_receptioner = EXISTS (
+        SELECT 1
+        FROM proiect2.utilizator u
+                 JOIN proiect2.angajat a ON u.id = a.utiliztor_id
+                 JOIN proiect2.receptioner r ON a.id = r.angajat_id
+        WHERE u.CNP = cnp_to_check
+    );
+
+    RETURN is_receptioner;
+END;
+
+create
+    definer = root@localhost function IsResurseUmane(cnp_to_check varchar(45)) returns tinyint(1) reads sql data
+BEGIN
+    DECLARE is_resurse_umane BOOLEAN;
+
+    SET is_resurse_umane = EXISTS (
+        SELECT 1
+        FROM proiect2.utilizator u
+                 JOIN proiect2.angajat a ON u.id = a.utiliztor_id
+                 JOIN proiect2.resurse_umane ru ON a.id = ru.angajat_id
+        WHERE u.CNP = cnp_to_check
+    );
+
+    RETURN is_resurse_umane;
+END;
+
+create
+    definer = root@localhost function IsSuperAdministrator(in_cnp varchar(13)) returns tinyint(1) deterministic
+BEGIN
+    DECLARE utilizator_id INT;
+
+    -- Găsește utilizatorul după CNP
+    SELECT id INTO utilizator_id
+    FROM utilizator
+    WHERE CNP = in_cnp;
+
+    IF utilizator_id IS NOT NULL THEN
+        -- Verifică dacă utilizatorul este super administrator
+        RETURN EXISTS (
+            SELECT 1
+            FROM super_administrator
+            WHERE utilizator_id = utiliztor_id
+        );
+    ELSE
+        -- Utilizatorul nu a fost găsit
+        RETURN FALSE;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure ModificareServiciu(IN p_id int, IN p_durata int, IN p_pret decimal(10, 2))
+BEGIN
+    -- Verifică dacă parametrii sunt nenuli și actualizează doar dacă este cazul
+    IF p_durata IS NOT NULL THEN
+        UPDATE servicii SET durata = p_durata WHERE id = p_id;
+    END IF;
+
+    IF p_pret IS NOT NULL THEN
+        UPDATE servicii SET pret = p_pret WHERE id = p_id;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure ModificareUtilizator(IN in_cnp varchar(45), IN in_nume varchar(45),
+                                                            IN in_prenume varchar(45), IN in_adresa varchar(45),
+                                                            IN in_nrtel varchar(45), IN in_email varchar(45),
+                                                            IN in_IBAN varchar(45), IN in_nrcontact varchar(45),
+                                                            IN in_data_angajarii date, IN in_functie varchar(45))
+BEGIN
+    DECLARE utilizator_id INT;
+
+    -- Găsește utilizatorul după CNP
+    SELECT id INTO utilizator_id
+    FROM utilizator
+    WHERE CNP = in_cnp;
+
+    IF utilizator_id IS NOT NULL THEN
+        -- Actualizează înregistrarea utilizatorului cu noile date furnizate (în cazul în care datele furnizate nu sunt nule)
+        UPDATE utilizator
+        SET
+            nume = IFNULL(in_nume, nume),
+            prenume = IFNULL(in_prenume, prenume),
+            adresa = IFNULL(in_adresa, adresa),
+            nrtel = IFNULL(in_nrtel, nrtel),
+            email = IFNULL(in_email, email),
+            IBAN = IFNULL(in_IBAN, IBAN),
+            nrcontact = IFNULL(in_nrcontact, nrcontact),
+            data_angajarii = IFNULL(in_data_angajarii, data_angajarii),
+            functie = IFNULL(in_functie, functie)
+        WHERE id = utilizator_id;
+
+        SELECT 'Modificare realizată cu succes.' AS rezultat;
+    ELSE
+        SELECT 'Utilizatorul nu a fost găsit în tabelul utilizator.' AS rezultat;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure ModificareUtilizatorAdmin(IN in_nume varchar(45), IN in_prenume varchar(45),
+                                                                 IN in_cnp varchar(45), IN in_nume_nou varchar(45),
+                                                                 IN in_prenume_nou varchar(45),
+                                                                 IN in_adresa varchar(45), IN in_nrtel varchar(45),
+                                                                 IN in_email varchar(45), IN in_IBAN varchar(45),
+                                                                 IN in_nrcontact varchar(45), IN in_data_angajarii date,
+                                                                 IN in_functie varchar(45))
+BEGIN
+    DECLARE utilizator_id INT;
+    DECLARE este_super_admin BOOLEAN;
+
+    -- Găsește utilizatorul după nume și prenume
+    SELECT u.id INTO utilizator_id
+    FROM utilizator u
+    WHERE u.nume = in_nume AND u.prenume = in_prenume;
+
+    IF utilizator_id IS NOT NULL THEN
+        -- Verifică dacă utilizatorul este super administrator
+        SELECT 1 INTO este_super_admin
+        FROM super_administrator
+        WHERE utilizator_id = utilizator_id;
+
+        IF este_super_admin IS NULL THEN
+            -- Utilizatorul nu este super administrator, deci putem modifica datele
+            UPDATE utilizator
+            SET
+                CNP = in_cnp,
+                nume = in_nume_nou,
+                prenume = in_prenume_nou,
+                adresa = IFNULL(in_adresa, adresa),
+                nrtel = IFNULL(in_nrtel, nrtel),
+                email = IFNULL(in_email, email),
+                IBAN = IFNULL(in_IBAN, IBAN),
+                nrcontact = IFNULL(in_nrcontact, nrcontact),
+                data_angajarii = IFNULL(in_data_angajarii, data_angajarii),
+                functie = IFNULL(in_functie, functie)
+            WHERE id = utilizator_id;
+
+            SELECT 'Modificare realizată cu succes.' AS rezultat;
+        ELSE
+            -- Utilizatorul este super administrator, nu permitem modificarea datelor
+            SELECT 'Utilizatorul este super administrator. Nu sunt permise modificări.' AS rezultat;
+        END IF;
+    ELSE
+        -- Utilizatorul nu a fost găsit
+        SELECT 'Utilizatorul nu a fost găsit.' AS rezultat;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure StergereAngajat(IN angajat_id int)
+BEGIN
+    DECLARE client_id INT;
+
+    -- Găsește client_id-ul utilizatorului asociat angajatului
+    SELECT client_id INTO client_id
+    FROM angajat
+    WHERE id = angajat_id
+    LIMIT 1;
+
+    -- Verifică dacă există un client asociat acestui angajat
+    IF client_id IS NOT NULL THEN
+        -- Șterge utilizatorul asociat
+        DELETE FROM utilizator WHERE id = client_id;
+    END IF;
+
+    -- Șterge angajatul
+    DELETE FROM angajat WHERE id = angajat_id;
+
+END;
+
+create
+    definer = root@localhost procedure StergereClient(IN client_id int)
+BEGIN
+    
+    DELETE FROM client WHERE id = client_id;
+END;
+
+create
+    definer = root@localhost procedure StergereConcediu(IN concediu_id int)
+BEGIN
+    -- Șterge înregistrarea din tabelul concediu pe baza ID-ului
+    DELETE FROM concediu WHERE id = concediu_id;
+END;
+
+create
+    definer = root@localhost procedure StergereOrar(IN id_orar int)
+BEGIN
+    -- Șterge orarul din tabelul 'orar' pe baza ID-ului
+    DELETE FROM orar
+    WHERE id = id_orar;
+
+    -- Poți adăuga opțional verificări pentru a te asigura că orarul a fost șters cu succes
+    IF ROW_COUNT() = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Nu există orar cu acest ID.';
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure StergereUnitate(IN unitate_id int)
+BEGIN
+    -- Șterge înregistrarea din tabelul concediu pe baza ID-ului
+    DELETE FROM unitate WHERE id = unitate_id;
+END;
+
+create
+    definer = root@localhost procedure StergereUtilizator(IN utilizator_id int)
+BEGIN
+    DELETE FROM utilizator WHERE id = utilizator_id;
+END;
+
+create
+    definer = root@localhost procedure adauga_analiza_raport_medical(IN nume_param varchar(255),
+                                                                     IN prenume_param varchar(255),
+                                                                     IN nume_analiza_param varchar(255),
+                                                                     IN rezultat_analiza_param varchar(255))
+BEGIN
+    DECLARE pacient_id_var INT;
+
+    -- Obține id-ul pacientului pe baza numelui și prenumelui
+    SELECT id INTO pacient_id_var
+    FROM client
+    WHERE client.nume = nume_param AND client.prenume = prenume_param;
+
+    -- Inserează datele în tabela raport_medical
+    INSERT INTO raport_medical (client_id, nume_analiza, rezultat_analiza)
+    VALUES (pacient_id_var, nume_analiza_param, rezultat_analiza_param);
+END;
+
+create
+    definer = root@localhost procedure calcul_profit_per_medic_procedure()
+BEGIN
+    DECLARE result TEXT DEFAULT '';
+
+    -- Utilizează o sub-consulta pentru a obține totalul veniturilor și profitul pentru fiecare medic
+    SELECT GROUP_CONCAT(
+                   CONCAT('Medic ID ', medic.id, ': Total venit - ', IFNULL(total_venit, 0), ', Profit - ', IFNULL(profit, 0))
+                   SEPARATOR '\n'
+           ) INTO result
+    FROM medic
+             LEFT JOIN (
+        SELECT medic_id, SUM(pret) AS total_venit
+        FROM servicii
+        GROUP BY medic_id
+    ) AS servicii_total ON medic.id = servicii_total.medic_id
+             LEFT JOIN (
+        SELECT medic_id, SUM(pret) AS profit
+        FROM servicii
+        GROUP BY medic_id
+    ) AS servicii_profit ON medic.id = servicii_profit.medic_id;
+
+    -- Afiseaza rezultatul procedurii
+    SELECT result AS ProfitPerMedic;
+END;
+
+create
+    definer = root@localhost function calcul_profit_per_specialitate() returns text reads sql data
+BEGIN
+    DECLARE result TEXT;
+    DECLARE profit_per_specialitate TEXT DEFAULT '';
+    DECLARE medic_id_var, total_venit, total_cheltuieli INT;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE specialitate_val VARCHAR(45);
+
+    DECLARE cur CURSOR FOR SELECT DISTINCT medic_id FROM servicii;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    SET result = '';
+
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO medic_id_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Obținem specialitatea medicului
+        SELECT specialitatea INTO specialitate_val FROM medic WHERE id = medic_id_var;
+
+        -- Calculăm venitul total pentru specialitatea respectivă
+        SELECT IFNULL(SUM(pret), 0) INTO total_venit
+        FROM servicii
+        WHERE medic_id = medic_id_var;
+
+        -- Calculăm cheltuielile pentru specialitatea respectivă
+        SELECT IFNULL(SUM(cheltuieli), 0) INTO total_cheltuieli
+        FROM unitate
+                 JOIN servicii ON unitate.id = servicii.unitate_id
+        WHERE medic_id = medic_id_var;
+
+        -- Calculăm profitul pentru specialitatea respectivă
+        SET @profit_specialitate = total_venit - total_cheltuieli;
+
+        -- Construim rezultatul pentru specialitatea medicului
+        SET profit_per_specialitate = CONCAT(profit_per_specialitate, 'Medic ID ', medic_id_var, ', Specialitate: ', specialitate_val, ' - Profit: ', @profit_specialitate, '\n');
+        SET result = CONCAT(result, profit_per_specialitate);
+    END LOOP;
+
+    CLOSE cur;
+
+    RETURN result;
+END;
+
+create
+    definer = root@localhost function calcul_total_venit_per_medic() returns text reads sql data
+BEGIN
+    DECLARE result TEXT DEFAULT '';
+    DECLARE venit_per_medic TEXT DEFAULT '';
+    DECLARE medic_id_var INT;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE total_venit INT;
+
+    DECLARE cur CURSOR FOR SELECT id FROM medic;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO medic_id_var;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Debug pentru a verifica valorile citite
+        SET venit_per_medic = CONCAT('Medic ID ', medic_id_var, ': ');
+
+        SELECT IFNULL(SUM(servicii.pret), 0) INTO total_venit
+        FROM servicii
+        WHERE servicii.medic_id = medic_id_var;
+
+        -- Debug pentru a verifica total_venit
+        SET venit_per_medic = CONCAT(venit_per_medic, 'Total venit - ', total_venit);
+
+        SET venit_per_medic = CONCAT(venit_per_medic, '\n');
+        SET result = CONCAT(result, venit_per_medic);
+    END LOOP;
+
+    CLOSE cur;
+
+    RETURN result;
+END;
+
+create
+    definer = root@localhost function gaseste_id_orar_angajat(angajat_id_param int) returns int deterministic
+BEGIN
+    DECLARE medic_id_param INT;
+    DECLARE orar_id INT;
+    SELECT id INTO medic_id_param FROM medic WHERE angajat_id = angajat_id_param;
+    SELECT id INTO orar_id FROM orar WHERE medic_id = medic_id_param;
+
+    RETURN orar_id;
+END;
+
+create
+    definer = root@localhost function gaseste_orar_id(angajat_id_param int) returns int deterministic
+BEGIN
+    DECLARE orar_id_result INT;
+    SELECT orar_id INTO orar_id_result FROM asistent WHERE angajat_id = angajat_id_param;
+    IF orar_id_result IS NULL THEN
+        SELECT orar_id INTO orar_id_result FROM receptioner WHERE angajat_id = angajat_id_param;
+    END IF;
+    IF orar_id_result IS NULL THEN
+        SELECT orar_id INTO orar_id_result FROM financiar WHERE angajat_id = angajat_id_param;
+    END IF;
+    IF orar_id_result IS NULL THEN
+        SELECT orar_id INTO orar_id_result FROM resurse_umane WHERE angajat_id = angajat_id_param;
+    END IF;
+    RETURN orar_id_result;
+END;
+
+create
+    definer = root@localhost function getValoareBonFiscalByIdMedic(id_medic int, id_consultatie int) returns int
+    deterministic
+BEGIN
+    DECLARE v INT;
+    Declare id_1 int;
+    select id into id_1
+    from programari
+    where medic_id=id_medic and id=id_consultatie
+    limit 1;
+    if id_1 is not null then
+        select valoare into v
+        from bon_fiscal
+        where consultatie_id=id_1
+        limit 2;
+    else
+        return 0;
+    end if;
+    IF v IS NOT NULL THEN
+        RETURN v;
+    ELSE
+        RETURN 0;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure id_utilizator(IN utilizatorId int)
+BEGIN
+    DECLARE foundId INT;
+    DECLARE specificId INT;
+
+    -- Verificăm dacă utilizatorul există în tabelul 'utilizator'
+    SELECT COUNT(*)
+    INTO foundId
+    FROM utilizator
+    WHERE id = utilizatorId;
+
+    -- Dacă utilizatorul este găsit, returnăm toate informațiile despre el
+    IF foundId > 0 THEN
+        SELECT *
+        FROM utilizator
+        WHERE id = utilizatorId;
+    ELSE
+        -- Dacă utilizatorul nu este găsit, afișăm un mesaj informativ
+        SELECT 'Utilizatorul nu a fost găsit.' AS mesaj;
+    END IF;
+END;
+
+create
+    definer = root@localhost procedure idj(IN employeeId int)
+BEGIN
+    DECLARE foundId INT;
+    DECLARE tableName VARCHAR(45);
+    DECLARE specificId INT;
+
+    SELECT
+        CASE
+            WHEN EXISTS (SELECT 1 FROM proiect2.medic WHERE angajat_id = employeeId) THEN 1
+            WHEN EXISTS (SELECT 1 FROM proiect2.asistent WHERE angajat_id = employeeId) THEN 2
+            WHEN EXISTS (SELECT 1 FROM proiect2.receptioner WHERE angajat_id = employeeId) THEN 3
+            WHEN EXISTS (SELECT 1 FROM proiect2.financiar WHERE angajat_id = employeeId) THEN 4
+            WHEN EXISTS (SELECT 1 FROM proiect2.resurse_umane WHERE angajat_id = employeeId) THEN 5
+            ELSE 0
+            END INTO foundId;
+
+    CASE
+        WHEN foundId = 1 THEN
+            SET tableName = 'medic';
+            SELECT id INTO specificId FROM proiect2.medic WHERE angajat_id = employeeId;
+        WHEN foundId = 2 THEN
+            SET tableName = 'asistent';
+            SELECT id INTO specificId FROM proiect2.asistent WHERE angajat_id = employeeId;
+        WHEN foundId = 3 THEN
+            SET tableName = 'receptioner';
+            SELECT id INTO specificId FROM proiect2.receptioner WHERE angajat_id = employeeId;
+        WHEN foundId = 4 THEN
+            SET tableName = 'financiar';
+            SELECT id INTO specificId FROM proiect2.financiar WHERE angajat_id = employeeId;
+        WHEN foundId = 5 THEN
+            SET tableName = 'resurse_umane';
+            SELECT id INTO specificId FROM proiect2.resurse_umane WHERE angajat_id = employeeId;
+        ELSE
+            SET tableName = 'N/A';
+            SET specificId = NULL;
+        END CASE;
+
+    IF tableName != 'N/A' THEN
+        SET @sql = CONCAT('SELECT * FROM proiect2.', tableName, ' WHERE id = ', specificId);
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+END;
+
